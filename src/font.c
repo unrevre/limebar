@@ -1,6 +1,22 @@
 #include "font.h"
 
 #include "component.h"
+#include "window.h"
+
+#include <CoreFoundation/CFAttributedString.h>
+#include <CoreFoundation/CFBase.h>
+#include <CoreFoundation/CFDictionary.h>
+#include <CoreFoundation/CFNumber.h>
+#include <CoreFoundation/CFString.h>
+#include <CoreGraphics/CGBase.h>
+#include <CoreGraphics/CGContext.h>
+#include <CoreGraphics/CGGeometry.h>
+#include <CoreText/CTFont.h>
+#include <CoreText/CTFontDescriptor.h>
+#include <CoreText/CTLine.h>
+#include <CoreText/CTStringAttributes.h>
+
+#include <stdio.h>
 
 CTFontRef create_font(char* cstring)
 {

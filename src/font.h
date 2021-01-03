@@ -1,6 +1,12 @@
 #ifndef FONT_H
 #define FONT_H
 
+#include <CoreGraphics/CGGeometry.h>
+#include <CoreText/CTFont.h>
+#include <CoreText/CTLine.h>
+
+struct component;
+
 enum alignment_type
 {
     ALIGN_LEFT,

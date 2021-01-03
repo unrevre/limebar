@@ -1,6 +1,12 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
+#include <CoreGraphics/CGContext.h>
+#include <CoreGraphics/CGGeometry.h>
+#include <CoreGraphics/CGPath.h>
+
+#include <stdint.h>
+
 #define kCGSDisableShadowTagBit         (1 <<  3)
 #define kCGSIgnoreForExposeTagBit       (1 <<  7)
 #define kCGSStickyTagBit                (1 << 11)
