@@ -1,17 +1,30 @@
 CC	= clang
-CFLAGS	= -O2
-FRAMES	= -F/System/Library/PrivateFrameworks \
-	  -framework SkyLight \
-	  -framework Carbon \
-	  -framework IOKit
+CFLAGS	= -O2 -flto
+FRAMES	= -F/System/Library/PrivateFrameworks
+LDFLAGS	= -framework Carbon -framework SkyLight -framework IOKit
 
 BINDIR	= ./bin
+BLDDIR	= ./build
+SRCDIR	= ./src
 
-all:	mkdir
-	$(CC) ./src/limebar.c $(CFLAGS) -o $(BINDIR)/limebar $(FRAMES)
+SRCS	= $(filter-out $(SRCDIR)/limebar.c,$(wildcard $(SRCDIR)/*.c))
+DEPS	= $(patsubst $(SRCDIR)/%.c,$(BLDDIR)/%.d,$(SRCS))
+OBJS	= $(patsubst $(SRCDIR)/%.c,$(BLDDIR)/%.o,$(SRCS))
+
+all:	mkdir $(OBJS) $(BINDIR)/limebar
+
+$(BLDDIR)/%.o: $(SRCDIR)/%.c
+	$(CC) $(CFLAGS) $(FRAMES) -MMD -c $< -o $@
+
+$(BINDIR)/limebar: $(SRCDIR)/limebar.c $(OBJS)
+	$(CC) $(CFLAGS) $(LDFLAGS) $(FRAMES) $^ -o $@
 
 mkdir:
-	mkdir -p $(BINDIR)
+	mkdir -p $(BINDIR) $(BLDDIR)
 
 clean:
-	rm -rf $(BINDIR)
+	rm -rf $(BINDIR) $(BLDDIR)
+
+.PHONY:	all mkdir clean
+
+-include $(DEPS)

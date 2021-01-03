@@ -1,17 +1,8 @@
-#include <Carbon/Carbon.h>
-#include <IOKit/ps/IOPowerSources.h>
-#include <IOKit/ps/IOPSKeys.h>
+#include "component.h"
 
-#include <inttypes.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <unistd.h>
 
 int g_connection;
-
-#include "component.c"
-#include "font.c"
-#include "window.c"
 
 extern int SLSMainConnectionID(void);
 

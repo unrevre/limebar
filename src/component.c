@@ -1,7 +1,25 @@
 #include "component.h"
 
 #include "font.h"
-#include "window.h"
+
+#include <CoreFoundation/CFArray.h>
+#include <CoreFoundation/CFBase.h>
+#include <CoreFoundation/CFDictionary.h>
+#include <CoreFoundation/CFNumber.h>
+#include <CoreFoundation/CFString.h>
+#include <CoreGraphics/CGContext.h>
+#include <CoreGraphics/CGDirectDisplay.h>
+#include <CoreGraphics/CGError.h>
+#include <CoreGraphics/CGGeometry.h>
+#include <IOKit/ps/IOPowerSources.h>
+#include <IOKit/ps/IOPSKeys.h>
+
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <unistd.h>
 
 #define set_component_color(f, component, color)    \
     f(component->window.context,                    \

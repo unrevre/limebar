@@ -3,6 +3,10 @@
 
 #include "window.h"
 
+#include <CoreText/CTFont.h>
+
+#include <stdint.h>
+
 struct color
 {
     int p;

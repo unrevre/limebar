@@ -1,5 +1,16 @@
 #include "window.h"
 
+#include <CoreFoundation/CFBase.h>
+#include <CoreFoundation/CFDictionary.h>
+#include <CoreGraphics/CGContext.h>
+#include <CoreGraphics/CGError.h>
+#include <CoreGraphics/CGGeometry.h>
+#include <CoreGraphics/CGPath.h>
+#include <CoreGraphics/CGWindowLevel.h>
+
+#include <stdbool.h>
+#include <stddef.h>
+
 extern CGError CGSNewRegionWithRect(CGRect* rect, CFTypeRef* outRegion);
 extern CGError SLSNewWindow(int cid, int type, float x, float y,
                             CFTypeRef region, uint32_t* wid);
