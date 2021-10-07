@@ -21,6 +21,7 @@ struct window
     CGMutablePathRef background;
 };
 
-void window_init(struct window* window, CGRect frame, int border_width);
+void window_init(struct window* window, CGRect frame, int xinset, int yinset,
+                 int slant);
 
 #endif

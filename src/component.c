@@ -65,16 +65,12 @@ static void component_init(struct component* component,
     CGRect frame = calculate_bounds(id, x, y, w, h);
 
     component->type = type;
-    component->bd_width = 2;
-    component->bd_color = color_from_hex(bd);
     component->fg_color = color_from_hex(fg);
     component->bg_color = color_from_hex(bg);
+    component->bd_color = color_from_hex(bd);
     component->font = create_font("Monaco:Regular:10.0");
 
-    window_init(&component->window, frame, component->bd_width);
-    CGContextSetLineWidth(component->window.context, component->bd_width);
-    set_component_color(CGContextSetRGBStrokeColor, component, bd_color);
-    set_component_color(CGContextSetRGBFillColor, component, bg_color);
+    window_init(&component->window, frame, 6, 1, 9);
 }
 
 void* component_create_shell(float x, float y, float w, float h,
@@ -254,17 +250,16 @@ void component_render(struct component* component)
     SLSOrderWindow(g_connection, component->window.id, 0, 0);
     CGContextClearRect(component->window.context, component->window.frame);
 
+    set_component_color(CGContextSetRGBFillColor, component, bd_color);
+    CGContextAddPath(component->window.context, component->window.border);
+    CGContextFillPath(component->window.context);
+
     set_component_color(CGContextSetRGBFillColor, component, bg_color);
     CGContextAddPath(component->window.context, component->window.background);
     CGContextFillPath(component->window.context);
 
     set_component_color(CGContextSetRGBFillColor, component, fg_color);
     component_render_map[component->type](component);
-
-    set_component_color(CGContextSetRGBStrokeColor, component, bd_color);
-    CGContextSetLineWidth(component->window.context, component->bd_width);
-    CGContextAddPath(component->window.context, component->window.border);
-    CGContextStrokePath(component->window.context);
 
     CGContextFlush(component->window.context);
     SLSOrderWindow(g_connection, component->window.id, 1, 0);

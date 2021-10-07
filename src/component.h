@@ -27,7 +27,6 @@ struct component
 {
     enum component_type type;
     struct window window;
-    int bd_width;
     struct color bd_color;
     struct color fg_color;
     struct color bg_color;

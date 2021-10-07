@@ -26,14 +26,26 @@ extern CGContextRef SLWindowContextCreate(int cid, uint32_t wid,
 
 extern int g_connection;
 
-void window_init(struct window* window, CGRect frame, int border_width)
+static void set_window_path(struct CGPath* path, int width, int height,
+                            int xinset, int yinset, int slant)
+{
+    CGPathMoveToPoint(path, NULL, xinset, yinset);
+
+    CGPathAddLineToPoint(path, NULL, width - xinset - slant, yinset);
+    CGPathAddLineToPoint(path, NULL, width - xinset, height - yinset);
+    CGPathAddLineToPoint(path, NULL, xinset + slant, height - yinset);
+    CGPathAddLineToPoint(path, NULL, xinset, yinset);
+}
+
+void window_init(struct window* window, CGRect frame, int xinset, int yinset,
+                 int slant)
 {
     window->render_frame = (CGRect) {{0, 0}, frame.size};
 
-    frame.origin.x -= border_width;
-    frame.origin.y -= border_width;
-    frame.size.width  += 2 * border_width;
-    frame.size.height += 2 * border_width;
+    frame.origin.x -= xinset;
+    frame.origin.y -= yinset;
+    frame.size.width  += 2 * xinset;
+    frame.size.height += 2 * yinset;
 
     CFTypeRef region;
     CGSNewRegionWithRect(&frame, &region);
@@ -57,18 +69,20 @@ void window_init(struct window* window, CGRect frame, int border_width)
     window->frame = frame;
 
     window->border = CGPathCreateMutable();
-    CGRect border = {
-        { border_width, border_width },
-        { frame.size.width - 2 * border_width,
-          frame.size.height - 2 * border_width }
-    };
-    CGPathAddRoundedRect(window->border, NULL, border, 8, 8);
+    set_window_path(
+        window->border,
+        frame.size.width,
+        frame.size.height,
+        xinset,
+        yinset,
+        slant);
 
     window->background = CGPathCreateMutable();
-    CGRect background = {
-        { 1.5f * border_width, 1.5f * border_width },
-        { frame.size.width - 3 * border_width,
-          frame.size.height - 3 * border_width }
-    };
-    CGPathAddRoundedRect(window->background, NULL, background, 7, 7);
+    set_window_path(
+        window->background,
+        frame.size.width,
+        frame.size.height,
+        xinset * 2,
+        yinset * 2,
+        slant);
 }
