@@ -11,15 +11,15 @@ int main(int argc, char* argv[])
     g_connection = SLSMainConnectionID();
 
     struct component* title = component_create_shell(
-        0.1875f, 0.0075f, 0.6250f, 0.0225f,
-        0xff2d2d2d, 0xffe8e6df, 0xffffcc66,
-        "yabai -m query --windows --window | grep title | cut -d'\"' -f4");
+        0.1105f, 0.0075f, 0.7560f, 0.0225f,
+        0xff393939, 0xffffe0a3, 0xffa09f93,
+        "yabai -m query --windows --window | jq -r '.app + \" | \" + .title'");
     struct component* power = component_create_power(
-        0.8750f, 0.0075f, 0.0500f, 0.0225f,
-        0xff2d2d2d, 0xffe8e6df, 0xff99cc99);
+        0.8660f, 0.0075f, 0.0550f, 0.0225f,
+        0xff393939, 0xffc1e0c1, 0xffa09f93);
     struct component* time = component_create_time(
-        0.9375f, 0.0075f, 0.0500f, 0.0225f,
-        0xff2d2d2d, 0xffe8e6df, 0xff6699cc);
+        0.9205f, 0.0075f, 0.0550f, 0.0225f,
+        0xff393939, 0xffa3c1e0, 0xffa09f93);
 
     for (;;) {
         component_update(title);
