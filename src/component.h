@@ -18,6 +18,7 @@ struct color
 
 enum component_type
 {
+    CPT_NULL,
     CPT_SHELL,
     CPT_POWER,
     CPT_TIME,
@@ -31,6 +32,11 @@ struct component
     struct color fg_color;
     struct color bg_color;
     CTFontRef font;
+};
+
+struct component_null
+{
+    struct component component;
 };
 
 struct component_shell
@@ -54,13 +60,18 @@ struct component_power
     char output[16];
 };
 
+void* component_create_null(float x, float y, float w, float h,
+                            uint32_t fg, uint32_t bg, uint32_t bd,
+                            enum window_type type);
 void* component_create_shell(float x, float y, float w, float h,
                              uint32_t fg, uint32_t bg, uint32_t bd,
-                             char* command);
+                             char* command, enum window_type type);
 void* component_create_power(float x, float y, float w, float h,
-                             uint32_t fg,  uint32_t bg, uint32_t bd);
+                             uint32_t fg,  uint32_t bg, uint32_t bd,
+                             enum window_type type);
 void* component_create_time(float x, float y, float w, float h,
-                            uint32_t fg, uint32_t bg, uint32_t bd);
+                            uint32_t fg, uint32_t bg, uint32_t bd,
+                            enum window_type type);
 
 void component_update(struct component* component);
 void component_render(struct component* component);

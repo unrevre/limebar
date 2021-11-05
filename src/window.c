@@ -26,19 +26,23 @@ extern CGContextRef SLWindowContextCreate(int cid, uint32_t wid,
 
 extern int g_connection;
 
-static void set_window_path(struct CGPath* path, int width, int height,
-                            int xinset, int yinset, int slant)
+static void set_window_path(struct CGPath* path, enum window_type type,
+                            int width, int height, int xinset, int yinset,
+                            int slant)
 {
     CGPathMoveToPoint(path, NULL, xinset, yinset);
 
-    CGPathAddLineToPoint(path, NULL, width - xinset - slant, yinset);
+    int xse = width - xinset - ((type == 2) ? 0 : slant);
+    int xnw = xinset + ((type == 0) ? 0 : slant);
+
+    CGPathAddLineToPoint(path, NULL, xse, yinset);
     CGPathAddLineToPoint(path, NULL, width - xinset, height - yinset);
-    CGPathAddLineToPoint(path, NULL, xinset + slant, height - yinset);
+    CGPathAddLineToPoint(path, NULL, xnw, height - yinset);
     CGPathAddLineToPoint(path, NULL, xinset, yinset);
 }
 
-void window_init(struct window* window, CGRect frame, int xinset, int yinset,
-                 int slant)
+void window_init(struct window* window, enum window_type type, CGRect frame,
+                 int xinset, int yinset, int slant)
 {
     window->render_frame = (CGRect) {{0, 0}, frame.size};
 
@@ -71,6 +75,7 @@ void window_init(struct window* window, CGRect frame, int xinset, int yinset,
     window->border = CGPathCreateMutable();
     set_window_path(
         window->border,
+        type,
         frame.size.width,
         frame.size.height,
         xinset,
@@ -80,6 +85,7 @@ void window_init(struct window* window, CGRect frame, int xinset, int yinset,
     window->background = CGPathCreateMutable();
     set_window_path(
         window->background,
+        type,
         frame.size.width,
         frame.size.height,
         xinset * 2,

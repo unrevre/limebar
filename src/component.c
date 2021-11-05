@@ -57,49 +57,66 @@ static CGRect calculate_bounds(uint32_t id, float x, float y, float w, float h)
 }
 
 static void component_init(struct component* component,
-                           enum component_type type,
+                           enum component_type ctype, enum window_type wtype,
                            float x, float y, float w, float h,
                            uint32_t fg, uint32_t bg, uint32_t bd)
 {
     uint32_t id = CGMainDisplayID();
     CGRect frame = calculate_bounds(id, x, y, w, h);
 
-    component->type = type;
+    component->type = ctype;
     component->fg_color = color_from_hex(fg);
     component->bg_color = color_from_hex(bg);
     component->bd_color = color_from_hex(bd);
     component->font = create_font("Monaco:Regular:10.0");
 
-    window_init(&component->window, frame, 6, 1, 9);
+    window_init(&component->window, wtype, frame, 6, 1, 9);
+}
+
+void* component_create_null(float x, float y, float w, float h,
+                            uint32_t fg, uint32_t bg, uint32_t bd,
+                            enum window_type type)
+{
+    struct component_null* data = malloc(sizeof(struct component_null));
+    memset(data, 0, sizeof(struct component_null));
+    component_init(&data->component, CPT_NULL, type, x, y, w, h, fg, bg, bd);
+    return &data->component;
 }
 
 void* component_create_shell(float x, float y, float w, float h,
                              uint32_t fg, uint32_t bg, uint32_t bd,
-                             char* command)
+                             char* command, enum window_type type)
 {
-    struct component_shell* shell = malloc(sizeof(struct component_shell));
-    memset(shell, 0, sizeof(struct component_shell));
-    component_init(&shell->component, CPT_SHELL, x, y, w, h, fg, bg, bd);
-    shell->command = command;
-    return &shell->component;
+    struct component_shell* data = malloc(sizeof(struct component_shell));
+    memset(data, 0, sizeof(struct component_shell));
+    component_init(&data->component, CPT_SHELL, type, x, y, w, h, fg, bg, bd);
+    data->command = command;
+    return &data->component;
 }
 
 void* component_create_power(float x, float y, float w, float h,
-                             uint32_t fg, uint32_t bg, uint32_t bd)
+                             uint32_t fg, uint32_t bg, uint32_t bd,
+                             enum window_type type)
 {
-    struct component_power* power = malloc(sizeof(struct component_power));
-    memset(power, 0, sizeof(struct component_power));
-    component_init(&power->component, CPT_POWER, x, y, w, h, fg, bg, bd);
-    return &power->component;
+    struct component_power* data = malloc(sizeof(struct component_power));
+    memset(data, 0, sizeof(struct component_power));
+    component_init(&data->component, CPT_POWER, type, x, y, w, h, fg, bg, bd);
+    return &data->component;
 }
 
 void* component_create_time(float x, float y, float w, float h,
-                            uint32_t fg, uint32_t bg, uint32_t bd)
+                            uint32_t fg, uint32_t bg, uint32_t bd,
+                            enum window_type type)
 {
-    struct component_time* time = malloc(sizeof(struct component_time));
-    memset(time, 0, sizeof(struct component_time));
-    component_init(&time->component, CPT_TIME, x, y, w, h, fg, bg, bd);
-    return &time->component;
+    struct component_time* data = malloc(sizeof(struct component_time));
+    memset(data, 0, sizeof(struct component_time));
+    component_init(&data->component, CPT_TIME, type, x, y, w, h, fg, bg, bd);
+    return &data->component;
+}
+
+static void component_update_null(struct component* component)
+{
+    (void)component;
 }
 
 static void component_update_shell(struct component* component)
@@ -207,6 +224,7 @@ static void component_update_time(struct component* component)
 
 static void (*component_update_map[])(struct component* component) =
 {
+    [CPT_NULL]  = component_update_null,
     [CPT_SHELL] = component_update_shell,
     [CPT_POWER] = component_update_power,
     [CPT_TIME]  = component_update_time,
@@ -215,6 +233,12 @@ static void (*component_update_map[])(struct component* component) =
 void component_update(struct component* component)
 {
     component_update_map[component->type](component);
+}
+
+static void component_render_null(struct component* component)
+{
+    struct component_null* data = (struct component_null*)component;
+    (void)data;
 }
 
 static void component_render_shell(struct component* component)
@@ -239,6 +263,7 @@ static void component_render_time(struct component* component)
 
 static void (*component_render_map[])(struct component* component) =
 {
+    [CPT_NULL]  = component_render_null,
     [CPT_SHELL] = component_render_shell,
     [CPT_POWER] = component_render_power,
     [CPT_TIME]  = component_render_time,
