@@ -3,12 +3,14 @@
 #include <unistd.h>
 
 int g_connection;
+int g_counter;
 
 extern int SLSMainConnectionID(void);
 
 int main(int argc, char* argv[])
 {
     g_connection = SLSMainConnectionID();
+    g_counter = 0;
 
     struct component* front = component_create_null(
         0.0075f, 0.0075f, 0.1035f, 0.0225f,
@@ -36,6 +38,10 @@ int main(int argc, char* argv[])
         0xff393939, 0xffa3c1e0, 0xffa09f93,
         WIN_MID);
 
+    title->refresh_rate = 1;
+    power->refresh_rate = 128;
+    time->refresh_rate = 32;
+
     for (;;) {
         component_update(title);
         component_render(title);
@@ -47,6 +53,8 @@ int main(int argc, char* argv[])
         component_render(time);
 
         sleep(1);
+
+        ++g_counter;
     }
 
     return 0;

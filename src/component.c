@@ -34,6 +34,7 @@ extern CGError SLSOrderWindow(int cid, uint32_t wid, int mode,
                               uint32_t relativeToWID);
 
 extern int g_connection;
+extern int g_counter;
 
 static struct color color_from_hex(uint32_t color)
 {
@@ -69,6 +70,7 @@ static void component_init(struct component* component,
     component->bg_color = color_from_hex(bg);
     component->bd_color = color_from_hex(bd);
     component->font = create_font("Monaco:Regular:10.0");
+    component->refresh_rate = 1;
 
     window_init(&component->window, wtype, frame, 6, 1, 9);
 }
@@ -232,6 +234,9 @@ static void (*component_update_map[])(struct component* component) =
 
 void component_update(struct component* component)
 {
+    if (g_counter % component->refresh_rate != 0)
+        return;
+
     component_update_map[component->type](component);
 }
 
