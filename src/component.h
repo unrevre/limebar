@@ -33,6 +33,8 @@ struct component
     struct color bg_color;
     CTFontRef font;
     int refresh_rate;
+    int update;
+    int cache;
 };
 
 struct component_null

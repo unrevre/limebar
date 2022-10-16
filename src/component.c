@@ -1,6 +1,7 @@
 #include "component.h"
 
 #include "font.h"
+#include "util.h"
 
 #include <CoreFoundation/CFArray.h>
 #include <CoreFoundation/CFBase.h>
@@ -57,6 +58,40 @@ static CGRect calculate_bounds(uint32_t id, float x, float y, float w, float h)
     return (CGRect) {{cx, cy}, {cw, ch}};
 }
 
+static void component_init_none(struct component* component)
+{
+    (void)component;
+}
+
+static void component_init_shell(struct component* component)
+{
+    struct component_shell* data = (struct component_shell*)component;
+
+    (void)data;
+}
+
+static void component_init_power(struct component* component)
+{
+    struct component_power* data = (struct component_power*)component;
+
+    (void)data;
+}
+
+static void component_init_time(struct component* component)
+{
+    struct component_time* data = (struct component_time*)component;
+
+    snprintf(data->icon, sizeof(data->icon), "♪ ");
+}
+
+static void (*component_init_map[])(struct component* component) =
+{
+    [CPT_NULL]  = component_init_none,
+    [CPT_SHELL] = component_init_shell,
+    [CPT_POWER] = component_init_power,
+    [CPT_TIME]  = component_init_time,
+};
+
 static void component_init(struct component* component,
                            enum component_type ctype, enum window_type wtype,
                            float x, float y, float w, float h,
@@ -71,6 +106,10 @@ static void component_init(struct component* component,
     component->bd_color = color_from_hex(bd);
     component->font = create_font("Monaco:Regular:10.0");
     component->refresh_rate = 1;
+    component->update = 1;
+    component->cache = 1;
+
+    component_init_map[component->type](component);
 
     window_init(&component->window, wtype, frame, 6, 1, 9);
 }
@@ -129,6 +168,7 @@ static void component_update_shell(struct component* component)
     int nbytes = 0;
     char* result = NULL;
     char buffer[BUFSIZ];
+    int cache = -1;
 
     FILE* handle = popen(data->command, "r");
     if (!handle) return;
@@ -144,8 +184,15 @@ static void component_update_shell(struct component* component)
     if (result && nbytes != -1) {
         result[length] = '\0';
         data->output = result;
+
+        cache = hash(result);
     } else {
         data->output = "";
+    }
+
+    if (cache != component->cache) {
+        component->cache = cache;
+        component->update = 1;
     }
 
     pclose(handle);
@@ -163,6 +210,7 @@ static void component_update_power(struct component* component)
     int cur_cap = 0;
     int max_cap = 0;
     int percent = 0;
+    int cache;
 
     int ps_count = ps_list ? CFArrayGetCount(ps_list) : 0;
     for (int i = 0; i < ps_count; ++i) {
@@ -191,6 +239,7 @@ static void component_update_power(struct component* component)
 
         CFNumberGetValue((CFNumberRef)ps_cur, kCFNumberSInt32Type, &cur_cap);
         CFNumberGetValue((CFNumberRef)ps_max, kCFNumberSInt32Type, &max_cap);
+
         percent = (int)((double)cur_cap / (double)max_cap * 100);
 
         break;
@@ -199,12 +248,20 @@ static void component_update_power(struct component* component)
     if (ps_list) CFRelease(ps_list);
     if (ps_info) CFRelease(ps_info);
 
-    if (has_battery) {
-        snprintf(data->output, sizeof(data->output), "%' ' 3d%%", percent);
-        snprintf(data->icon, sizeof(data->icon), (is_charging) ? "+" : "-");
-    } else {
-        snprintf(data->output, sizeof(data->output), "A/C");
-        snprintf(data->icon, sizeof(data->icon), "=");
+    cache = (has_battery) ? ((is_charging) ? percent : -percent) : -999;
+
+    if (cache != component->cache) {
+        component->cache = cache;
+
+        if (has_battery) {
+            snprintf(data->output, sizeof(data->output), "%' ' 3d%%", percent);
+            snprintf(data->icon, sizeof(data->icon), (is_charging) ? "+" : "-");
+        } else {
+            snprintf(data->output, sizeof(data->output), "A/C");
+            snprintf(data->icon, sizeof(data->icon), "=");
+        }
+
+        component->update = 1;
     }
 }
 
@@ -215,13 +272,21 @@ static void component_update_time(struct component* component)
     time_t rawtime;
     time(&rawtime);
 
+    int cache;
+
     struct tm* timeinfo = localtime(&rawtime);
     if (timeinfo) {
-        snprintf(data->output, sizeof(data->output), "%02d:%02d",
-            timeinfo->tm_hour, timeinfo->tm_min);
-    }
+        cache = (timeinfo->tm_hour << 8) + timeinfo->tm_min;
 
-    snprintf(data->icon, sizeof(data->icon), "♪ ");
+        if (cache != component->cache) {
+            component->cache = cache;
+
+            snprintf(data->output, sizeof(data->output), "%02d:%02d",
+                timeinfo->tm_hour, timeinfo->tm_min);
+
+            component->update = 1;
+        }
+    }
 }
 
 static void (*component_update_map[])(struct component* component) =
@@ -276,6 +341,9 @@ static void (*component_render_map[])(struct component* component) =
 
 void component_render(struct component* component)
 {
+    if (!component->update)
+        return;
+
     SLSDisableUpdate(g_connection);
     SLSOrderWindow(g_connection, component->window.id, 0, 0);
     CGContextClearRect(component->window.context, component->window.frame);
@@ -294,4 +362,6 @@ void component_render(struct component* component)
     CGContextFlush(component->window.context);
     SLSOrderWindow(g_connection, component->window.id, 1, 0);
     SLSReenableUpdate(g_connection);
+
+    component->update = 0;
 }
