@@ -39,8 +39,8 @@ int main(int argc, char* argv[])
         WIN_MID);
 
     title->refresh_rate = 1;
-    power->refresh_rate = 128;
-    time->refresh_rate = 32;
+    power->refresh_rate = 64;
+    time->refresh_rate = 4;
 
     for (;;) {
         component_update(title);
